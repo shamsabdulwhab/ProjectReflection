@@ -1,14 +1,12 @@
-import { useState } from 'react'
-import './App.css'
+import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import Join from './pages/Join'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-       
-    </>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/join" element={<Join />} />
+    </Routes>
   )
 }
-
-export default App
