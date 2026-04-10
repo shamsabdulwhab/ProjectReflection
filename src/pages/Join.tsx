@@ -1,15 +1,19 @@
-import { useMemo, useState } from 'react'
+import {useEffect} from 'react'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '../lib/firebase'
 import EditableTitle from '../components/EditableTitle'
 import ReactQrCode from 'react-qr-code'
-import { makeSessionId } from '../lib/sessions'
+
+
 
 export default function Join() {
-  const [sessionId] = useState(() => makeSessionId())
-  const joinUrl = useMemo(
-    () => `${window.location.origin}/session/${encodeURIComponent(sessionId)}/join`,
-    [sessionId],
-  )
-
+  const sessionId = 'DEFAULT'
+  useEffect(() => {
+    // Create a new session document in the database ينشئ دوكيومنت جديد في القاعدة البيانية
+    setDoc(doc(db, 'sessions', sessionId), {
+    })
+  }, [sessionId])
+  const joinUrl = `${window.location.origin}/session/${sessionId}/join`
   const QRCode = (ReactQrCode as unknown as { default?: typeof ReactQrCode }).default ?? ReactQrCode
 
   return (
@@ -20,5 +24,4 @@ export default function Join() {
       </div>
     </main>
   )
-
 }
