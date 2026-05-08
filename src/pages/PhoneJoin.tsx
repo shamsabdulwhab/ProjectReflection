@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { doc, onSnapshot, setDoc } from 'firebase/firestore'
+import { useNavigate, useParams } from 'react-router-dom'
+import { doc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 
 type Status = 'idle' | 'loading' | 'success'
 
 export default function PhoneJoin() {
-  const sessionId = 'DEFAULT'
+  const { sessionId } = useParams()
   const [name, setName] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const navigate = useNavigate()
@@ -34,6 +34,7 @@ export default function PhoneJoin() {
     try {
       await setDoc(doc(db, 'sessions', sessionId, 'participants', trimmedName), {
         name: trimmedName,
+        joinedAt: serverTimestamp(),
       })
       sessionStorage.setItem(`participantName:${sessionId}`, trimmedName)
       setStatus('success')
