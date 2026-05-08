@@ -34,23 +34,9 @@ npm run dev
 npm run build
 ```
 
-### Preview production build
-```bash
-npm run preview
-```
 
-### Lint
-```bash
-npm run lint
-```
 
-## Environment variables
-This project uses a `.env` file for local configuration.
-
-- Do not commit your real `.env` if it contains secrets.
-- If you need to share required keys/variable names, create a `.env.example` with placeholder values.
-
-## Project structure (high level)
+## Project structure 
 - `src/App.tsx`: app entry and routing
 - `src/pages/Join.tsx`: join flow
 - `src/pages/PhoneJoin.tsx`: phone join flow
