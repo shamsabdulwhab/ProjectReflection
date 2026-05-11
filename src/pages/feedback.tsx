@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { collection, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { db } from '../lib/firebase'
 import Slider from '../components/slider'
 
@@ -19,12 +19,18 @@ export default function Feedback() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
 
+  // Roster from Firestore (live). Doc ids match participant doc ids from PhoneJoin.
   const [participants, setParticipants] = useState<Participant[]>([])
   // Slider value per participant id (percentage). Keys are added when the participants list loads.
   const [scores, setScores] = useState<Record<string, number>>({})
+  // Mirrors sessions/{sessionId}.assessmentStarted — host must start before sliders are shown.
   const [assessmentStarted, setAssessmentStarted] = useState<boolean>(false)
+  // Final "Submit" writes showVisualisation on the session doc for the host screen to open Visualisation.
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle')
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   // Same id string PhoneJoin stored when this user joined (used as Firestore doc id for raterScores).
+  // Re-read only when sessionId changes (not on every render); avoids redundant sessionStorage access.
   const myName = useMemo(() => {
     if (!sessionId) return null
     return sessionStorage.getItem(`participantName:${sessionId}`)
@@ -34,6 +40,7 @@ export default function Feedback() {
   useEffect(() => {
     if (!sessionId) return
 
+    // onSnapshot returns unsubscribe — returned from useEffect so we detach on unmount or sessionId change.
     return onSnapshot(doc(db, 'sessions', sessionId), (snap) => {
       setAssessmentStarted(snap.data()?.assessmentStarted === true)
     })
@@ -54,6 +61,7 @@ export default function Feedback() {
 
       setParticipants(list)
 
+      // Functional update: keep existing slider values; only assign 50 for newly seen participant ids.
       setScores((prev) => {
         const next = { ...prev }
         for (const p of list) {
@@ -65,6 +73,7 @@ export default function Feedback() {
   }, [sessionId])
 
   // Debounced write: when sliders change, save this user’s ratings map to Firestore (visualisation reads it).
+  // Each `scores` change schedules a new 400ms timer; cleanup cancels the previous one so we don’t write every tick.
   useEffect(() => {
     if (!sessionId || !myName || !assessmentStarted) return
 
@@ -80,6 +89,7 @@ export default function Feedback() {
   }, [sessionId, myName, assessmentStarted, scores])
 
   // You don’t rate yourself — only other participants get a row + slider.
+  // useMemo: `scores` updates often while dragging; filtering only depends on participants + myName.
   const visibleParticipants = useMemo(() => {
     if (!myName) return participants
     return participants.filter((p) => p.id !== myName)
@@ -126,6 +136,7 @@ export default function Feedback() {
   return (
     <main style={{ padding: 16, display: 'grid', gap: 12 }}>
       {visibleParticipants.map((p) => {
+        // Fallback 50 matches default when a key was just added in the participants listener.
         const value = scores[p.id] ?? 50
 
         return (
@@ -148,11 +159,39 @@ export default function Feedback() {
         )
       })}
 
-      {visibleParticipants.length > 0 && (
-        <p style={{ margin: 0, marginTop: 8 }}>
-          <Link to={`/session/${sessionId}/visualisation`}>Open visualisation</Link>
-        </p>
-      )}
+      <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        {/* Merge into session doc: Join.tsx listens for showVisualisation and navigates the big screen. */}
+        <button
+          type="button"
+          disabled={submitStatus !== 'idle'}
+          onClick={async () => {
+            setSubmitError(null)
+            setSubmitStatus('submitting')
+            try {
+              await setDoc(
+                doc(db, 'sessions', sessionId),
+                {
+                  showVisualisation: true,
+                  showVisualisationAt: serverTimestamp(),
+                  showVisualisationBy: myName,
+                },
+                { merge: true },
+              )
+              setSubmitStatus('submitted')
+            } catch (e) {
+              const message = e instanceof Error ? e.message : String(e)
+              setSubmitError(message)
+              setSubmitStatus('idle')
+            }
+          }}
+        >
+          {submitStatus === 'submitted' ? 'Submitted' : submitStatus === 'submitting' ? 'Submitting…' : 'Submit'}
+        </button>
+        {submitError && <span style={{ fontSize: 14, color: '#b00020' }}>{submitError}</span>}
+        {submitStatus === 'submitted' && (
+          <span style={{ fontSize: 14, opacity: 0.75 }}>The big screen will open the visualisation.</span>
+        )}
+      </div>
     </main>
   )
 }

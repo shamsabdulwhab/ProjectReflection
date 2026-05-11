@@ -7,10 +7,16 @@ type Status = 'idle' | 'loading' | 'success'
 
 export default function PhoneJoin() {
   const { sessionId } = useParams()
+  // Controlled input: the name the user types before joining.
   const [name, setName] = useState('')
+  // Join flow: idle → loading (Firestore write) → success (waiting screen). On error we reset to idle.
   const [status, setStatus] = useState<Status>('idle')
   const navigate = useNavigate()
 
+  // Subscribe to the session document so we react when the host starts the assessment.
+  // We only navigate once the user has successfully joined (status === 'success'); including `status`
+  // in the dependency array resubscribes when it changes so the snapshot callback sees the latest value.
+  // Cleanup unsubscribes to avoid leaks when sessionId or status changes or the component unmounts.
   useEffect(() => {
     if (!sessionId) return
 

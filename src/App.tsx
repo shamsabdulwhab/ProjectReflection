@@ -13,7 +13,7 @@ export default function App() {
       <Route path="/session/:sessionId/join" element={<PhoneJoin />} />
       <Route path="/session/:sessionId/join/feedback" element={<Feedback />} />
       <Route path="/session/:sessionId/visualisation" element={<Visualisation />} />
-      <Route path="/visualisation" element={<Navigate to="/session/DEFAULT/visualisation" replace />} />
+      <Route path="/visualisation" element={<Navigate to="/join" replace />} />
     </Routes>
   )
 }
