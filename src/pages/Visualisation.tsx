@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { useParams } from 'react-router-dom'
-import { db } from '../lib/firebase'
+import { getDb } from '../lib/firebase'
 import './visualisation.css'
 
 // --- Types (what shape our data has) ----------------------------------------
@@ -199,7 +199,7 @@ export default function Visualisation() {
       return
     }
 
-    const participantsCollection = collection(db, 'sessions', sessionId, 'participants')
+    const participantsCollection = collection(getDb(), 'sessions', sessionId, 'participants')
 
     const unsubscribe = onSnapshot(participantsCollection, (snapshot) => {
       const list: Participant[] = []
@@ -226,7 +226,7 @@ export default function Visualisation() {
       return
     }
 
-    const scoresCollection = collection(db, 'sessions', sessionId, 'raterScores')
+    const scoresCollection = collection(getDb(), 'sessions', sessionId, 'raterScores')
 
     const unsubscribe = onSnapshot(scoresCollection, (snapshot) => {
       const next: { [raterId: string]: { [participantId: string]: number } } = {}

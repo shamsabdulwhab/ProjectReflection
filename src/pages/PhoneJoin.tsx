@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { doc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore'
-import { db } from '../lib/firebase'
+import { getDb } from '../lib/firebase'
 
 type Status = 'idle' | 'loading' | 'success'
 
@@ -20,7 +20,7 @@ export default function PhoneJoin() {
   useEffect(() => {
     if (!sessionId) return
 
-    const unsub = onSnapshot(doc(db, 'sessions', sessionId), (snap) => {
+    const unsub = onSnapshot(doc(getDb(), 'sessions', sessionId), (snap) => {
       const started = snap.data()?.assessmentStarted === true
       if (started && status === 'success') {
         navigate(`/session/${sessionId}/join/feedback`)
@@ -38,7 +38,7 @@ export default function PhoneJoin() {
 
     setStatus('loading')
     try {
-      await setDoc(doc(db, 'sessions', sessionId, 'participants', trimmedName), {
+      await setDoc(doc(getDb(), 'sessions', sessionId, 'participants', trimmedName), {
         name: trimmedName,
         joinedAt: serverTimestamp(),
       })

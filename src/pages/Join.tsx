@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { collection, doc, onSnapshot, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
-import { db } from '../lib/firebase'
+import { getDb } from '../lib/firebase'
 import { createNewHostSessionId, getOrCreateSessionId } from '../lib/sessionId'
 import ReactQrCode from 'react-qr-code'
 import './join.css'
@@ -15,14 +15,14 @@ export default function Join() {
 
   useEffect(() => {
     setDoc(
-      doc(db, 'sessions', sessionId),
+      doc(getDb(), 'sessions', sessionId),
       { createdAt: serverTimestamp(), assessmentStarted: false },
       { merge: true },
     )
   }, [sessionId])
 
   useEffect(() => {
-    return onSnapshot(doc(db, 'sessions', sessionId), (snap) => {
+    return onSnapshot(doc(getDb(), 'sessions', sessionId), (snap) => {
       setAssessmentStarted(snap.data()?.assessmentStarted === true)
       if (snap.data()?.showVisualisation === true) {
         navigate(`/session/${sessionId}/visualisation`)
@@ -31,7 +31,7 @@ export default function Join() {
   }, [sessionId, navigate])
 
   useEffect(() => {
-    const ref = collection(db, 'sessions', sessionId, 'participants')
+    const ref = collection(getDb(), 'sessions', sessionId, 'participants')
     return onSnapshot(ref, (snap) => {
       const rows = snap.docs.map((d) => {
         const data = d.data() as { name?: string; joinedAt?: Timestamp }
@@ -92,7 +92,7 @@ export default function Join() {
               setStartError(null)
               try {
                 await setDoc(
-                  doc(db, 'sessions', sessionId),
+                  doc(getDb(), 'sessions', sessionId),
                   { assessmentStarted: true, assessmentStartedAt: serverTimestamp() },
                   { merge: true },
                 )

@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
-import { db } from '../lib/firebase'
+import { getDb } from '../lib/firebase'
 import Slider from '../components/slider'
 
 type Participant = { id: string; name: string }
@@ -41,7 +41,7 @@ export default function Feedback() {
     if (!sessionId) return
 
     // onSnapshot returns unsubscribe — returned from useEffect so we detach on unmount or sessionId change.
-    return onSnapshot(doc(db, 'sessions', sessionId), (snap) => {
+    return onSnapshot(doc(getDb(), 'sessions', sessionId), (snap) => {
       setAssessmentStarted(snap.data()?.assessmentStarted === true)
     })
   }, [sessionId])
@@ -50,7 +50,7 @@ export default function Feedback() {
   useEffect(() => {
     if (!sessionId) return
 
-    const ref = collection(db, 'sessions', sessionId, 'participants')
+    const ref = collection(getDb(), 'sessions', sessionId, 'participants')
     const q = query(ref, orderBy('name'))
 
     return onSnapshot(q, (snapshot) => {
@@ -79,7 +79,7 @@ export default function Feedback() {
 
     const handle = window.setTimeout(() => {
       void setDoc(
-        doc(db, 'sessions', sessionId, 'raterScores', myName),
+        doc(getDb(), 'sessions', sessionId, 'raterScores', myName),
         { scores, updatedAt: serverTimestamp() },
         { merge: true },
       )
@@ -170,7 +170,7 @@ export default function Feedback() {
             setSubmitStatus('submitting')
             try {
               await setDoc(
-                doc(db, 'sessions', sessionId),
+                doc(getDb(), 'sessions', sessionId),
                 {
                   showVisualisation: true,
                   showVisualisationAt: serverTimestamp(),
