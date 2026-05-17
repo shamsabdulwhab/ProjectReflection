@@ -1,9 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// In dev we want clean local URLs like `/join`.
-// In production (e.g. GitHub Pages project site) we may need a subpath.
-const base = process.env.NODE_ENV === 'production' ? '/project-reflection-main/' : '/'
+// Vercel/Netlify use `/`. For GitHub Pages subpaths set VITE_BASE_PATH e.g. `/project-reflection-main/`
+const base = process.env.VITE_BASE_PATH ?? '/'
 
 // https://vite.dev/config/
 export default defineConfig({
