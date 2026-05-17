@@ -8,8 +8,8 @@ type EditableTitleProps = {
 }
 
 export default function EditableTitle({
-  initialValue = 'Group Name',
-  placeholder = 'Enter group name',
+  placeholder = 'Enter session name',
+  initialValue = '',
   onChange,
   className,
 }: EditableTitleProps) {
@@ -17,11 +17,13 @@ export default function EditableTitle({
   const [editing, setEditing] = useState(false)
 
   function finish() {
-    const next = value.trim() || initialValue
+    const next = value.trim()
     setValue(next)
     setEditing(false)
     onChange?.(next)
   }
+
+  const display = value.trim()
 
   return editing ? (
     <input
@@ -37,8 +39,7 @@ export default function EditableTitle({
     />
   ) : (
     <h1 className={className} onClick={() => setEditing(true)}>
-      {value}
+      {display || <span style={{ opacity: 0.45 }}>{placeholder}</span>}
     </h1>
   )
 }
-

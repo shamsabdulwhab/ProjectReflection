@@ -1,0 +1,70 @@
+.home-page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  overflow: hidden;
+  background-color: #fdf1e4;
+  background-image: linear-gradient(to right, #e6d1d3, #f9e9d8, #f9b29d);
+}
+
+.home-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  padding: 24px;
+}
+
+.home-title {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  color: #0a0a0a;
+}
+
+.home-subtitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  color: #1a1a1a;
+  opacity: 0.85;
+}
+
+.home-editable-title {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  color: #0a0a0a;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  text-align: center;
+}
+
+.home-editable-title::placeholder {
+  color: #1a1a1a;
+  opacity: 0.45;
+}
+
+.home-start-link {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 12px 32px;
+  background: #fff;
+  color: #000;
+  border: 1px solid #0a0a0a;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 400;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.home-start-link:hover {
+  opacity: 0.9;
+}

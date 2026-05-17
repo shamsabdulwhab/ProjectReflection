@@ -1,0 +1,99 @@
+.visualisation-page {
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  background-color: #fdf1e4;
+  background-image: linear-gradient(to right, #e6d1d3, #f9e9d8, #f9b29d);
+}
+
+.viz-decor {
+  position: absolute;
+  width: clamp(120px, 18vw, 200px);
+  height: clamp(120px, 18vw, 200px);
+  pointer-events: none;
+  opacity: 0.9;
+  background: linear-gradient(145deg, #ffd54f 0%, #ffab91 45%, #f48fb1 100%);
+  border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%;
+}
+
+.viz-decor--top-right {
+  top: -24px;
+  right: -16px;
+  transform: rotate(18deg);
+}
+
+.viz-decor--bottom-left {
+  bottom: -32px;
+  left: -24px;
+  transform: rotate(-28deg) scale(1.15);
+}
+
+.viz-layout {
+  position: relative;
+  z-index: 1;
+  width: min(94vmin, 920px);
+  max-width: 100%;
+}
+
+.viz-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.viz-ring {
+  fill: none;
+  stroke: #e8a4a8;
+  stroke-width: 3;
+}
+
+.viz-ring-label {
+  font-size: 16px;
+  font-weight: 500;
+  fill: #111;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.viz-avatar {
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.viz-avatar-initials {
+  font-size: 15px;
+  font-weight: 600;
+  fill: #111;
+  pointer-events: none;
+  user-select: none;
+}
+
+.viz-pending {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 15px;
+  color: #1a1a1a;
+  opacity: 0.85;
+}
+
+.viz-pending ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: center;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .viz-decor {
+    opacity: 0.55;
+  }
+}

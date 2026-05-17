@@ -1,28 +1,18 @@
 import { Link } from 'react-router-dom'
+import EditableTitle from '../components/EditableTitle'
+import './home.css'
 
 export default function Home() {
   return (
-    <main style={styles.page}>
-      <section style={styles.content}>
-        <h1 style={styles.title}>Group Reflection</h1>
-        <p style={styles.subtitle}>Understand how others see you</p>
-        <Link to="/join" className="secondaryBtn">
+    <main className="home-page">
+      <section className="home-content">
+        <h1 className="home-title"> Reflection</h1>
+        <p className="home-subtitle">Understand how others see you</p>
+        <EditableTitle className="home-editable-title" />
+        <Link to="/join" className="home-start-link">
           Start the session
         </Link>
       </section>
     </main>
   )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: '100vh',
-    display: 'grid',
-    placeItems: 'center',
-    padding: 24,
-    textAlign: 'center',
-  },
-  content: { display: 'grid', gap: 12, justifyItems: 'center' },
-  title: { margin: 0, fontSize: 44, letterSpacing: -0.6 },
-  subtitle: { margin: 0, opacity: 0.75 },
 }

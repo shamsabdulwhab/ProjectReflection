@@ -89,7 +89,8 @@ export default function Feedback() {
   }, [sessionId, myName, assessmentStarted, scores])
 
   // You don’t rate yourself — only other participants get a row + slider.
-  // useMemo: `scores` updates often while dragging; filtering only depends on participants + myName.
+  // useMemo: `scores` updates often while dragging; 
+  // filtering only depends on participants + myName.
   const visibleParticipants = useMemo(() => {
     if (!myName) return participants
     return participants.filter((p) => p.id !== myName)

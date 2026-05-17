@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { useParams } from 'react-router-dom'
 import { db } from '../lib/firebase'
+import './visualisation.css'
 
 // --- Types (what shape our data has) ----------------------------------------
 
@@ -23,7 +24,64 @@ type RingName = 'Core' | 'Close' | 'Immediate' | 'Far' | 'Distant'
 // Fixed order we print sections in (inside → outside idea)
 const RINGS_IN_ORDER: RingName[] = ['Core', 'Close', 'Immediate', 'Far', 'Distant']
 
+const DIAGRAM_CX = 500
+const DIAGRAM_CY = 500
+/** Nudge labels left from the ring line (negative = left). */
+const RING_LABEL_OFFSET_X = -50
+/** Outer radius of each ring band (Core → Distant), in SVG units. */
+const RING_OUTER_RADIUS: Record<RingName, number> = {
+  Core: 100,
+  Close: 200,
+  Immediate: 300,
+  Far: 400,
+  Distant: 480,
+}
+
 // --- Small pure functions (easy to test, easy to read) -----------------------
+
+function ringIndex(ring: RingName): number {
+  return RINGS_IN_ORDER.indexOf(ring)
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+function personColor(id: string): string {
+  const palette = ['#f9d56e', '#7ec8e3', '#8fd694', '#f48fb1', '#b39ddb', '#ffab91']
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
+  return palette[Math.abs(hash) % palette.length]
+}
+
+/** Stable angle jitter so positions do not jump on re-render. */
+function angleJitter(id: string): number {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 17 + id.charCodeAt(i)) | 0
+  return ((hash % 50) - 25) * (Math.PI / 180)
+}
+
+/** Place a person in the middle of their ring band at an even angle around the circle. */
+function placeInRing(
+  ring: RingName,
+  indexInRing: number,
+  countInRing: number,
+  personId: string,
+): { x: number; y: number } {
+  const idx = ringIndex(ring)
+  const outer = RING_OUTER_RADIUS[ring]
+  const inner = idx === 0 ? 0 : RING_OUTER_RADIUS[RINGS_IN_ORDER[idx - 1]]
+  const midRadius = (inner + outer) / 2
+  const baseAngle = countInRing <= 1 ? -Math.PI / 2 : (2 * Math.PI * indexInRing) / countInRing - Math.PI / 2
+  const angle = baseAngle + angleJitter(personId)
+  return {
+    x: DIAGRAM_CX + midRadius * Math.cos(angle),
+    y: DIAGRAM_CY + midRadius * Math.sin(angle),
+  }
+}
 
 /**
  * Turn one average (0–100) into a ring name.
@@ -203,41 +261,75 @@ export default function Visualisation() {
 
   if (!sessionId) {
     return (
-      <main>
+      <main className="visualisation-page">
         <p>Missing session id in the URL.</p>
       </main>
     )
   }
 
   return (
-    <main>
-      <h1>Visualisation</h1>
+    <main className="visualisation-page">
+      <div className="viz-decor viz-decor--top-right" aria-hidden />
+      <div className="viz-decor viz-decor--bottom-left" aria-hidden />
 
-      {RINGS_IN_ORDER.map((ringName) => {
-        const peopleInThisRing = buckets[ringName]
+      <div className="viz-layout">
+        <svg
+          className="viz-svg"
+          viewBox="0 0 1000 1000"
+          role="img"
+          aria-label="Concentric rings showing how close each participant is rated"
+        >
+          {RINGS_IN_ORDER.map((ringName) => (
+            <circle
+              key={ringName}
+              className="viz-ring"
+              cx={DIAGRAM_CX}
+              cy={DIAGRAM_CY}
+              r={RING_OUTER_RADIUS[ringName]}
+            />
+          ))}
 
-        return (
-          <section key={ringName}>
-            <h2>{ringName}</h2>
+          {RINGS_IN_ORDER.map((ringName) => (
+            <text
+              key={`label-${ringName}`}
+              className="viz-ring-label"
+              x={DIAGRAM_CX + RING_OUTER_RADIUS[ringName] + RING_LABEL_OFFSET_X}
+              y={DIAGRAM_CY}
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {ringName}
+            </text>
+          ))}
+
+          {RINGS_IN_ORDER.flatMap((ringName) => {
+            const peopleInRing = buckets[ringName]
+            return peopleInRing.map((person, index) => {
+              const { x, y } = placeInRing(ringName, index, peopleInRing.length, person.id)
+              return (
+                <g key={person.id} transform={`translate(${x}, ${y})`}>
+                  <title>{person.name}</title>
+                  <circle className="viz-avatar" r={26} fill={personColor(person.id)} />
+                  <text className="viz-avatar-initials" textAnchor="middle" dominantBaseline="central">
+                    {initials(person.name)}
+                  </text>
+                </g>
+              )
+            })
+          })}
+        </svg>
+
+        {pending.length > 0 ? (
+          <div className="viz-pending">
+            <p>Waiting for scores</p>
             <ul>
-              {peopleInThisRing.map((person) => (
+              {pending.map((person) => (
                 <li key={person.id}>{person.name}</li>
               ))}
             </ul>
-          </section>
-        )
-      })}
-
-      {pending.length > 0 ? (
-        <section>
-          <h2>No average yet</h2>
-          <ul>
-            {pending.map((person) => (
-              <li key={person.id}>{person.name}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+          </div>
+        ) : null}
+      </div>
     </main>
   )
 }
