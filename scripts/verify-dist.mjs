@@ -59,4 +59,6 @@ if (assetFiles.length < 8) {
   process.exit(1)
 }
 
+fs.writeFileSync(path.join(distDir, 'build-id.txt'), `${Date.now()}\n`)
+
 console.log(`verify-dist: ok (${assetFiles.length} assets, ${referenced.length} referenced from index.html)`)
