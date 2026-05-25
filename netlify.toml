@@ -1,5 +1,6 @@
+# Publish ONLY the Vite output folder (not the repo root).
+# In the Netlify UI: Publish directory = dist (leave Build command empty OR match below).
 [build]
-  # --include=dev: keep TypeScript + Vite available when NODE_ENV=production
   command = "npm ci --include=dev && npm run build"
   publish = "dist"
 

@@ -20,6 +20,22 @@ if (html.includes('/src/main.tsx')) {
   process.exit(1)
 }
 
+if (html.includes('/project-reflection-main/')) {
+  console.error(
+    'verify-dist: dist/index.html uses GitHub Pages base /project-reflection-main/. ' +
+      'Unset VITE_BASE_PATH on Netlify; vite.config.ts forces "/" when NETLIFY=true.',
+  )
+  process.exit(1)
+}
+
+if (fs.existsSync(path.join(distDir, 'netlify.toml'))) {
+  console.error(
+    'verify-dist: dist/netlify.toml must not exist. ' +
+      'Netlify publish directory must be "dist" (contents), not the repo root.',
+  )
+  process.exit(1)
+}
+
 const referenced = [...html.matchAll(/\/assets\/([^"']+)/g)].map((m) => m[1])
 for (const file of referenced) {
   const filePath = path.join(assetsDir, file)

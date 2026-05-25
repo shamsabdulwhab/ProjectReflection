@@ -99,6 +99,8 @@ npm run preview
 
 The site is configured for [Netlify](https://www.netlify.com/) via `netlify.toml` (build `dist`, SPA fallback for React Router).
 
+**Netlify UI must match:** Publish directory = `dist` only. A good deploy’s file browser shows `assets/` (~10 files), `index.html`, `icons.svg` — not `netlify.toml` at the site root.
+
 1. In Netlify: **Add new site** → **Import from Git** → select this repository.
 2. **Site configuration → Build & deploy → Build settings** (must match `netlify.toml`):
    - **Build command:** leave empty to use `netlify.toml`, or `npm ci --include=dev && npm run build`
