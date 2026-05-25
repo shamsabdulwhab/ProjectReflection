@@ -6,11 +6,10 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# SPA fallback for React Router. Netlify serves matching files in dist first (force = false).
+# SPA fallback for React Router. force = false: real files in dist/ (e.g. /assets/*.js) are served first.
 # Do not set VITE_BASE_PATH on Netlify unless the site is hosted in a subpath.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
   force = false
-  conditions = {Path = ["!/*.js", "!/*.css", "!/*.mjs", "!/*.woff2", "!/*.svg", "!/*.ico", "!/*.png", "!/*.jpg", "!/assets/*"]}
