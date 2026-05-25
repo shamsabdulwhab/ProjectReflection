@@ -1,8 +1,16 @@
 [build]
-  command = "npm run build"
+  # --include=dev: keep TypeScript + Vite available when NODE_ENV=production
+  command = "npm ci --include=dev && npm run build"
   publish = "dist"
 
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback for React Router. Netlify serves matching files in dist first (force = false).
+# Do not set VITE_BASE_PATH on Netlify unless the site is hosted in a subpath.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
+  conditions = {Path = ["!/*.js", "!/*.css", "!/*.mjs", "!/*.woff2", "!/*.svg", "!/*.ico", "!/*.png", "!/*.jpg", "!/assets/*"]}

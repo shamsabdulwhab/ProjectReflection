@@ -95,6 +95,29 @@ Preview production build:
 npm run preview
 ```
 
+### Deploy on Netlify
+
+The site is configured for [Netlify](https://www.netlify.com/) via `netlify.toml` (build `dist`, SPA fallback for React Router).
+
+1. In Netlify: **Add new site** → **Import from Git** → select this repository.
+2. **Site configuration → Build & deploy → Build settings** (must match `netlify.toml`):
+   - **Build command:** leave empty to use `netlify.toml`, or `npm ci --include=dev && npm run build`
+   - **Publish directory:** `dist` (not `.` and not blank if the UI defaulted to repo root)
+   - **Base directory:** leave empty
+3. Build settings in `netlify.toml` run a full Vite build into `dist/`.
+4. Under **Site configuration → Environment variables**, add the same `VITE_*` values as in `.env` (Firebase config and, if needed, `VITE_PUBLIC_ORIGIN`).
+5. Set `VITE_PUBLIC_ORIGIN` to your Netlify URL (e.g. `https://your-site.netlify.app`, no trailing slash) so QR codes point at production.
+6. In the [Firebase console](https://console.firebase.google.com/), add that domain under **Authentication → Settings → Authorized domains** (and ensure Firestore rules allow your app).
+7. **Deploys → Trigger deploy → Clear cache and deploy site** after fixing publish directory.
+8. In the deploy **file browser**, open `assets/` — you should see **many** `.js` / `.css` files (not only two). The build log should list Vite chunk sizes like `dist/assets/index-….js`.
+
+**MIME type / module script errors** — the browser asked for a `.js` file but got HTML. Usually:
+
+- **Publish directory** must be `dist` (set in `netlify.toml`; do not override to `.` or repo root in the Netlify UI).
+- **Build** must succeed (`npm run build` produces hashed files under `dist/assets/`).
+- **Do not set** `VITE_BASE_PATH` on Netlify unless the site lives in a subdirectory.
+- Remove any **forced** `/* → /index.html` redirect in the Netlify UI that overrides `netlify.toml`.
+
 ---
 
 ## Repository structure
@@ -114,7 +137,7 @@ npm run preview
 │       └── Visualisation.tsx   # Ring view from aggregated scores
 ├── package.json
 ├── vite.config.ts
-└── vercel.json                
+└── netlify.toml                # Netlify build + SPA redirects
 ```
 
 ---
