@@ -1,7 +1,9 @@
 # Publish ONLY the Vite output folder (not the repo root).
 # In the Netlify UI: Publish directory = dist (leave Build command empty OR match below).
 [build]
-  command = "rm -rf dist && npm ci --include=dev && npm run build"
+  # Use npm install instead of npm ci to avoid lockfile sync errors on hosts
+  # when npm/node versions differ between environments.
+  command = "rm -rf dist && npm install --include=dev && npm run build"
   publish = "dist"
 
 [build.environment]
