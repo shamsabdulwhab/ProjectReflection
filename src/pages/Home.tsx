@@ -7,7 +7,7 @@ export default function Home() {
     <main className="home-page">
       <section className="home-content">
         <h1 className="home-title"> Reflection</h1>
-        <p className="home-subtitle">Understand how others see you</p>
+        <p className="home-subtitle">How others see you</p>
         <EditableTitle className="home-editable-title" />
         <Link to="/join" className="home-start-link">
           Start the session
