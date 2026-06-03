@@ -6,6 +6,17 @@ import { createNewHostSessionId, getOrCreateSessionId } from '../lib/sessionId'
 import ReactQrCode from 'react-qr-code'
 import './join.css'
 
+/** LAN/local dev uses VITE_PUBLIC_ORIGIN so phones can reach the host; production uses the live site host. */
+function getJoinOrigin(configured?: string): string {
+  if (typeof window === 'undefined') return configured ?? ''
+  const live = window.location.origin
+  if (!configured) return live
+  const host = window.location.hostname
+  const isLocal =
+    host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.') || host.endsWith('.local')
+  return isLocal ? configured : live
+}
+
 export default function Join() {
   const [sessionId, setSessionId] = useState(getOrCreateSessionId)
   const [participants, setParticipants] = useState<Array<{ id: string; name: string }>>([])
@@ -44,8 +55,9 @@ export default function Join() {
     })
   }, [sessionId])
 
-  const publicOrigin = (import.meta.env.VITE_PUBLIC_ORIGIN as string | undefined)?.replace(/\/$/, '')
-  const joinUrl = `${publicOrigin ?? window.location.origin}/session/${sessionId}/join`
+  const configuredOrigin = (import.meta.env.VITE_PUBLIC_ORIGIN as string | undefined)?.replace(/\/$/, '')
+  const origin = getJoinOrigin(configuredOrigin)
+  const joinUrl = `${origin}/session/${sessionId}/join`
   const QRCode = (ReactQrCode as unknown as { default?: typeof ReactQrCode }).default ?? ReactQrCode
 
   function changeSession() {
